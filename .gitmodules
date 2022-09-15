@@ -4,3 +4,7 @@
 [submodule "planet-hma-streams"]
 	path = planet-hma-streams
 	url = git@github.com:j0nflores/planet-hma-streams.git
+
+[submodule "widths"]
+	path = widths
+	url = https://earthengine.googlesource.com/users/jflores/widths
