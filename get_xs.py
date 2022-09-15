@@ -1,11 +1,11 @@
-#Function to generate a shapefile of river centerlines cross-sections
+#Function to generate cross-section points from river centerlines
 
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 
 
-#get xs for all lines in the input shape file
+#get xs for all lines from the input shape file
 def get_shape_xs(input_path,output_path,n_xs=10):
     '''n_xs = number of desire cross-sections'''
     df_all = gpd.GeoDataFrame()
