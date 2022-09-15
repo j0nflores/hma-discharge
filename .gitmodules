@@ -1,0 +1,6 @@
+[submodule "HiMAT"]
+	path = HiMAT
+	url = git@github.com:craigbrinkerhoff/HiMAT.git
+[submodule "planet-hma-streams"]
+	path = planet-hma-streams
+	url = git@github.com:j0nflores/planet-hma-streams.git
