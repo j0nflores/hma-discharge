@@ -9,7 +9,7 @@ import geopandas as gpd
 def get_shape_xs(input_path,output_path,n_xs=10):
     '''n_xs = number of desire cross-sections'''
     df_all = gpd.GeoDataFrame()
-    shape_df = gpd.read_file(input_path)[0:3]
+    shape_df = gpd.read_file(input_path)
     for i in range(len(shape_df)):
         df_line = line_xs(shape_df.iloc[i],n_xs)
         df_all = pd.concat([df_all,df_line])
