@@ -20,11 +20,21 @@ def get_shape_xs(input_path,output_path,n_xs,ids=None):
         df_all = pd.concat([df_all,df_line])
     df_all.crs = shape_df.crs
     df_all = df_all.reset_index()
-    df_all = df_all.rename(columns = {'index': 'xs_n'})
-    df_all['xsID'] = df_all.COMID.astype(str) + '_' + df_all.xs_n.astype(str)
-    df_all = df_all.reset_index()
-    df_all = df_all.rename(columns = {'index': 'mindex'})
-    df_all.to_file(output_path)
+
+    for i in range(7):
+        if i < 6:
+            merit_out = shape_df.iloc[i*1000:(i+1)*1000]
+            dfout = df_all[df_all.COMID.isin(merit_out.COMID)]
+        else:
+            merit_out = shape_df.iloc[i*1000:]
+            dfout = df_all[df_all.COMID.isin(merit_out.COMID)]
+
+        output_path_xs = f'{output_path}merit20_xs{i}.shp'
+        output_path_merit = f'{output_path}merit20_{i}.shp'
+        dfout.to_file(output_path_xs)
+        merit_out.to_file(output_path_merit)
+
+    #df_all.to_file()
     print('Done.')
 
 #get a number of xs for a single reach
@@ -42,5 +52,5 @@ def line_xs(line,n_xs):
 #comid_list = [46045476,44001563] 
 n = 30 #number of cross-sections
 merit_path = r'C:\Users\fa002\OneDrive - University of Massachusetts\Git\hma-discharge\data\merit\merit20.shp'
-out_path = './data/merit/merit20_xs.shp'
+out_path = './data/merit/'
 get_shape_xs(merit_path,out_path,n)
