@@ -15,7 +15,8 @@ data/
 figs/
 log/
 DA_merged/
-#rev/
+rev/
+temp/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
