@@ -1,6 +1,21 @@
+#files/imgs
+*.txt
+*.sh
+*.npy
 *.ipynb
-/data
-/agu
+*.pyc
+*.ipynb_checkpoints
+*.tif
+
+#folders
+.ipynb_checkpoints/
+output/
+dev/
+data/
+figs/
+log/
+DA_merged/
+#rev/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
