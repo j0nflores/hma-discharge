@@ -119,7 +119,7 @@ def calculate_percent_change_per_year(ds, idn='reach', var='LandsatPlanet', meth
     for river_id in river_ids:
         
         # Extract data for the reach
-        if (var == 'LandsatPlanet') | (var == 'precip_km3') :
+        if (var == 'LandsatPlanet'):# | (var == 'precip_km3') :
             river_data = ds.sel(reach=river_id)
             years = river_data['year'].year 
         elif (var == 'week') | (var == 'gmp'):
@@ -193,17 +193,17 @@ def export_trend_test(ds,var,output_folder):
     mean_annual = ds.mean('time').to_dataframe().reset_index()
     mean_annual.columns = ['COMID',f'{var}_mean']
 
-    #mean_annual_std = ds.std('time').to_dataframe().reset_index()
-    #mean_annual_std.columns = ['COMID',f'melt_mean_annual_std']
+    mean_annual_std = ds.std('time').to_dataframe().reset_index()
+    mean_annual_std.columns = ['COMID',f'{var}_std']
 
     # %change, slope
     change_slope = calculate_percent_change_per_year(ds,'COMID',var)
 
     # MK trend test
-    trend_test_results = mann_kendall_trend_test_xr(ds[var],'COMID','time')
+    trend_test_results = mann_kendall_trend_test_xr(ds[var],'COMID','time',plabel=var)
     trendstat = trend_test_results.to_dataframe().reset_index().rename(columns={'reach':'COMID'})
 
-    dfs = [mean_annual, change_slope, trendstat] #mean_annual_std, 
+    dfs = [mean_annual, mean_annual_std, change_slope, trendstat] #mean_annual_std, 
 
     #merge dataframes
     alldf = dfs[0]
