@@ -7,7 +7,6 @@ from functions import makeHRRID
 
 if __name__ == '__main__':
     
-    
     version = 'glacierized'
     gdf_riv = gpd.read_file('/nas/cee-water/cjgleason/jonathan/himat_routing/data/riv_hma.shp')
     

@@ -107,4 +107,4 @@ if __name__ == '__main__':
     else:
         ds_p = xr.open_dataset(precip_nc)
 
-    #export_trend_test(ds_p,'precip_km3','./output')
+    export_trend_test(ds_p,'precip_km3','./output')

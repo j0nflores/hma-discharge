@@ -210,12 +210,12 @@ def export_trend_test(ds,var,output_folder):
     for df in dfs[1:]:
         alldf = pd.merge(alldf, df, how='left', on='COMID')
     #alldf = alldf.merge(alldf_dams, how='left',on='COMID')
-    #alldf.to_csv(f'{output_folder}/alldf_{var}.csv')
+    alldf.set_index('COMID').to_csv(f'{output_folder}/alldf_{var}.csv')
 
     #Export dataframe as shapefile
-    gdf_riv = gpd.read_file('/nas/cee-water/cjgleason/jonathan/himat_routing/data/riv_hma.shp')
-    exportdf = gdf_riv[['COMID','geometry']].merge(alldf,on='COMID')
-    exportdf.to_file(f'{output_folder}/alldf_{var}.shp')
+    #gdf_riv = gpd.read_file('/nas/cee-water/cjgleason/jonathan/himat_routing/data/riv_hma.shp')
+    #exportdf = gdf_riv[['COMID','geometry']].merge(alldf,on='COMID')
+    #exportdf.to_file(f'{output_folder}/alldf_{var}.shp')
 
     return alldf
 

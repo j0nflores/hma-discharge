@@ -1,4 +1,5 @@
 #extract glacier melt proportion downstream assuming no change in storage/time
+#SLURM setup by basin
 
 import pandas as pd
 import geopandas as gpd
@@ -8,7 +9,6 @@ import xarray as xr
 from functions import get_down
 
 if __name__ == '__main__':
-    
     
     melt_rivups = xr.open_dataset('./output/melt_precip/monthly_melt_rivups.nc')
     melt_src = melt_rivups.mean('time').melt/1e9 #convert to km3
@@ -57,11 +57,15 @@ if __name__ == '__main__':
         temp_ds = ds_melt.sel(COMID=valid_ids)
         temp_ds['perc_melt'] = temp_ds['melt']/temp_ds.sel(COMID=outlet)['melt']
         if i == 0:
-            annual_melt_rivers = temp_ds
+            monthly_melt_rivers = temp_ds
             print(f'\t basin: {outlet} done')
         else:
-            annual_melt_rivers = xr.concat([annual_melt_rivers,temp_ds],dim='COMID')
+            monthly_melt_rivers = xr.concat([monthly_melt_rivers,temp_ds],dim='COMID')
             print(f'\t basin: {outlet} done')
     except:
         print(f'\t basin: {outlet} error')
-    annual_melt_rivers.to_netcdf(f'./output/melt_precip/monthly_melt_{outlet}.nc')
+    monthly_melt_rivers.to_netcdf(f'./output/melt_precip/monthly_melt_{outlet}.nc')
+    
+    #merge nc files of basins - not tested, lst
+    #annual_melt_rivers = xr.concat([f'monthly_melt_{outlet}.nc'],dim='COMID')
+    #annual_melt_rivers.to_netcdf(f'./output/melt_precip/annual_melt_rivers.nc')

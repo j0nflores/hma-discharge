@@ -9,7 +9,7 @@ import os
 import glob
 import numpy as np
 from scipy.stats import linregress, norm, theilslopes
-from functions import prewhite, mann_kendall_trend_test_xr, calculate_percent_change_per_year
+from functions import mann_kendall_trend_test_xr, calculate_percent_change_per_year
 
 if __name__ == '__main__':
     
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     basinname = ['SyrDarya','AmuDarya','Indus','Ganges/Brahmaputra','Irawaddy','Salween','Mekong','Yangtze','Yellow'] 
 
     ## Extract area-weighted glacier melt of intersecting upstream MERIT subcatchments per basin
-    if not os.path.exists('./output/melt/melt_rivups.nc'):
+    if not os.path.exists('./output/melt_precip/melt_rivups.nc'):
         
         for b,basin in enumerate(outlets): 
 
@@ -50,8 +50,7 @@ if __name__ == '__main__':
 
             # Compute the intersection geometries
             sjoin_df['intersection'] = sjoin_df.apply(
-                lambda row: row['geometry'].intersection(gdf2.loc[row['index_right'], 'geometry']), axis=1
-            )
+                lambda row: row['geometry'].intersection(gdf2.loc[row['index_right'], 'geometry']), axis=1)
 
             # Calculate the area of MERIT and RGI intersections in m2 and m3
             sjoin_df['intersection_area_m2'] = sjoin_df['intersection'].area
@@ -91,10 +90,10 @@ if __name__ == '__main__':
                     coords={"time": combo_df.time, "COMID": [comid]})], dim="COMID")
         
         #export annual melt data per MERIT reach
-        ds.to_netcdf('./output/melt/melt_rivups.nc')
+        ds.to_netcdf('./output/melt_precip/melt_rivups.nc')
 
     else:
-        ds = xr.open_dataset('./output/melt/melt_rivups.nc')
+        ds = xr.open_dataset('./output/melt_precip/melt_rivups.nc')
         
     
     ##export change trends for mapping
@@ -113,9 +112,9 @@ if __name__ == '__main__':
     trend_test_results = mann_kendall_trend_test_xr(ds[var],'COMID','time')
     trendstat = trend_test_results.to_dataframe().reset_index().rename(columns={'reach':'COMID'})
 
-    #merge dataframes and export
+    #merge export dataframes and shapefiles
     dfs = [mean_annual, mean_annual_std, change_slope, trendstat]
     alldf = dfs[0]
     for df in dfs[1:]:
         alldf = pd.merge(alldf, df, how='left', on='COMID')
-    alldf.to_csv('./output/alldf_melt.csv')
+    alldf.to_csv('./output/alldf_melt_rev.csv')

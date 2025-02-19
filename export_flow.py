@@ -76,7 +76,7 @@ if __name__ == '__main__':
     alldf = dfs[0]
     for df in dfs[1:]:
         alldf = pd.merge(alldf, df, how='left', on='COMID')
-    alldf.to_csv('./output/alldfx.csv')
+    alldf.to_csv('./output/alldf.csv')
 
     
     #plot cdfs
