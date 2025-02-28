@@ -119,7 +119,7 @@ def calculate_percent_change_per_year(ds, idn='reach', var='LandsatPlanet', meth
     for river_id in river_ids:
         
         # Extract data for the reach
-        if (var == 'LandsatPlanet'):# | (var == 'precip_km3') :
+        if (var == 'LandsatPlanet') | (var == 'power'):# | (var == 'precip_km3') :
             river_data = ds.sel(reach=river_id)
             years = river_data['year'].year 
         elif (var == 'week') | (var == 'gmp'):

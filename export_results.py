@@ -1,5 +1,7 @@
 import pandas as pd
 import geopandas as gpd
+from functions import export_trend_test
+import xarray as xr
 
 def get_trend(x):
     if ((x['trend_y'] == 'Significant') & (x['percent_change_per_year_y'] > 0)):
@@ -22,18 +24,30 @@ dams_merged = dams_merged[['COMID', 'mean_flow', 'mean_annual', 'mean_annual_std
        'percent_change_per_year_y', 'slope_y', 'p_value_y', 'trend_y', 'infra',
        'power_trend']]
 
+
+#Prep annual precip and melt data
+ds_p = xr.open_dataset('./output/melt_precip/annual_precip_rivers.nc')
+ds_m = xr.open_dataset('./output/melt_precip/annual_melt_rivers.nc')
+ds_merged = xr.merge([ds_m,ds_p],join='left')
+ds_merged['precip_km3'] = ds_merged['precip'] * ds_merged['unitarea']/1e6
+ds_merged['gmp_ratio'] = ds_merged['melt']/ds_merged['precip_km3']
+
+output_folder = './output/advances'
+for var in ['melt','precip_km3','gmp_ratio']:
+    export_trend_test(ds_merged,var,output_folder)
+    
 #Precip trend test
-precip_df = pd.read_csv('./output/advances/alldf_precip_km3.csv')#,index_col='COMID')
+precip_df = pd.read_csv(f'{output_folder}/alldf_precip_km3.csv')#,index_col='COMID')
 precip_df.columns = ['COMID', 'precip_mean', 'precip_std',
        'precip_change', 'precip_slope', 'precip_p']
 
 #Glacier melt trend test
-melt_df = pd.read_csv('./output/advances/alldf_melt.csv')
+melt_df = pd.read_csv(f'{output_folder}/alldf_melt.csv')
 melt_df.columns = ['COMID', 'melt_mean', 'melt_std',
        'melt_change', 'melt_slope', 'melt_p']
 
 #GMP ratio trend test
-df_ratio = pd.read_csv('./output/advances/alldf_gmp_ratio.csv')
+df_ratio = pd.read_csv(f'{output_folder}/alldf_gmp_ratio.csv')
 df_ratio.columns = ['COMID', 'gmp_mean', 'gmp_std',
        'gmp_change', 'gmp_slope', 'gmp_p']
 
@@ -48,28 +62,37 @@ for i, outlet in enumerate(outlets):
     basins.append(ids)
 basins = pd.concat(basins)
 
-#Ensemble models trend uncertainty
-mk_shp = gpd.read_file('./output/advances/mk.shp')
-mk_shp = mk_shp[['COMID','p','p_std',
-                 'ci_low','ci_up','mk_se_up','mk_se_low']]
+#Ensemble models trend uncertainty - discharge
+mk_q = pd.read_csv(f'{output_folder}/mk_LandsatPlanet.csv')#.set_index('COMID')
+mk_q.columns = ['COMID','ens_slope','ens_change','ens_slope_se','ens_change_se',
+                 'p','p_std','ci_low','ci_up','mk_se_up','mk_se_low']
+#mk_q = mk_q[['COMID','ens_slope','ens_change','ens_slope_se','ens_change_se',
+                 #'p','p_std','ci_low','ci_up','mk_se_up','mk_se_low']]
+
+mk_power = pd.read_csv(f'{output_folder}/mk_power.csv')
+mk_power.columns = ['COMID','pow_slope','pow_change','pow_slope_se','pow_change_se',
+                 'pow_p','pow_p_std','pow_ci_low','pow_ci_up','pow_mk_se_up','pow_mk_se_low']
+#mk_power = mk_power[['COMID','ens_slope','ens_change','ens_slope_se','ens_change_se',
+                 #'p','p_std','ci_low','ci_up','mk_se_up','mk_se_low']]
 
 #Merge and prepare results dataframe for export
 resultdf = dams_merged.merge(df_ratio,how='left', on='COMID')
 resultdf = resultdf.merge(precip_df,how='left', on='COMID')
 resultdf = resultdf.merge(melt_df,how='left', on='COMID')
 resultdf = resultdf.merge(basins,how='left', on='COMID')
-resultdf = resultdf.merge(mk_shp,how='left', on='COMID')
-
+resultdf = resultdf.merge(mk_q,how='left', on='COMID')
+resultdf = resultdf.merge(mk_power,how='left', on='COMID')
+print(resultdf.columns)
 
 #Fill NA 
-resultdf[['percent_change_per_year_y', 'gmp_ratio_mean', 'gmp_ratio_std',
-       'gmp_ratio_change', 'gmp_ratio_slope',  'precip_km3_mean', 'precip_km3_std',
-       'precip_km3_change', 'precip_km3_slope', 'melt_mean', 'melt_std',
-       'melt_change', 'melt_slope' ]] = resultdf[['percent_change_per_year_y', 'gmp_ratio_mean', 'gmp_ratio_std',
-       'gmp_ratio_change', 'gmp_ratio_slope',  'precip_km3_mean', 'precip_km3_std',
-       'precip_km3_change', 'precip_km3_slope', 'melt_mean', 'melt_std',
+resultdf[['percent_change_per_year_y', 'gmp_mean', 'gmp_std',
+       'gmp_change', 'gmp_slope',  'precip_mean', 'precip_std',
+       'precip_change', 'precip_slope', 'melt_mean', 'melt_std',
+       'melt_change', 'melt_slope' ]] = resultdf[['percent_change_per_year_y', 'gmp_mean', 'gmp_std',
+       'gmp_change', 'gmp_slope',  'precip_mean', 'precip_std',
+       'precip_change', 'precip_slope', 'melt_mean', 'melt_std',
        'melt_change', 'melt_slope' ]].fillna(0)
-resultdf[['precip_km3_p','gmp_ratio_p','melt_p']] = resultdf[['precip_km3_p','gmp_ratio_p','melt_p']].fillna(1)
+resultdf[['precip_p','gmp_p','melt_p']] = resultdf[['precip_p','gmp_p','melt_p']].fillna(1)
 resultdf[['infra']] = resultdf[['infra']].fillna('No dams')
 
 #Export results 
