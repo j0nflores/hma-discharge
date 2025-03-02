@@ -32,7 +32,7 @@ del lspl, ds
 
 #Calculate mean annual stream flow 
 mean_streamflow = ensemble.sel(time=slice('2004-01-01','2019-12-31'))
-mean_ens = mean_streamflow.groupby('time.year').sum('time')*24*3600/1e9#total annual, km3/yr
+mean_ens = mean_streamflow.groupby('time.year').sum('time')*24*3600/1e9 #total annual, km3/yr
 mean_ens = mean_ens.where(mean_ens != 0)
 mean_ens = mean_ens.to_dataset(name='LandsatPlanet')
 

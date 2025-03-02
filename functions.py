@@ -70,9 +70,14 @@ def mann_kendall_trend_test_xr(ds,idn='reach',date_n='year', alpha=0.05,plabel='
     p_values = np.zeros_like(ds[idn], dtype=float)  
     trends = np.empty_like(ds[idn], dtype='object')  
     
-    for i, reach in enumerate(ds[idn]):  
-        if idn!='reach':
+    for i, reach in enumerate(ds[idn]):
+        
+        if idn=='gauge':
+            x = ds.sel(gauge=reach)
+        
+        elif idn!='reach':
             x = ds.sel(COMID=reach)
+
         else:
             x = ds.sel(reach=reach) 
         X = prewhiten(x.values)  
@@ -124,6 +129,9 @@ def calculate_percent_change_per_year(ds, idn='reach', var='LandsatPlanet', meth
             years = river_data['year'].year 
         elif (var == 'week') | (var == 'gmp'):
             river_data = ds.sel(reach=river_id)
+            years = river_data['time']#.year 
+        elif (var == 'discharge'):
+            river_data = ds.sel(gauge=river_id)
             years = river_data['time']#.year 
         else:
             river_data = ds.sel(COMID=river_id) #
